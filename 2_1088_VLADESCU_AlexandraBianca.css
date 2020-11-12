@@ -1,43 +1,53 @@
 body {
     margin: 0;
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-    background-color: pink;
+    font-family: 'Tahoma';
+    color: #F4F3EE;
 }
 
 #left-side {
 
     grid-column-start: 1;
     grid-column-end: 2;
-    background-color: #709775;
-    border: 3px solid #709775;
+    background-color: #040F0F;
+    color: #FCFFFC;
     position: fixed;
     top:0;
     bottom: 0;
     left: 0;
-    right: 25%;
-
-    
+    right: 30%;    
 }
+
 #right-side {
-    background-color: #162521;
-    border: 3px solid #162521;
+    background-color: #040F0F;
     height: inherit;
     position: fixed;
     top:0;
     bottom: 0;
-    left: 75%;
-    right: 0;
+    left: 70%;
+    right: 0;    
 }
 
 #video {
-    border: 1px solid #F4F3EE;
-    background-color: #F4F3EE;
-    width: 80%;
-    height: 60%;
+    border: 3px solid #FCFFFC;
+    background-color: #FCFFFC;
+    width: 800px;
+    height: 400px;
     position: absolute; 
     top: 50%;
     left: 50%;
-    margin-left: -40%; 
-    margin-top: -30%;
+    margin-left: -400px; 
+    margin-top: -200px;
+    
 }
+
+.card {
+    border-bottom: 1px solid #FCFFFC;
+    margin-left: 5px;
+    margin-right: 5px;
+    height: 100px;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+
