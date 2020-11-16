@@ -25,35 +25,3 @@ consideră tentativă de fraudă; se verifică automat;
 * este permisă preluarea de fișiere media, cod CSS, fișiere de date din orice sursă;
 * pentru implementarea cerințelor nu sunt permise alte biblioteci JavaScript (este permisă utilizarea Bootstrap
 – doar partea de CSS). 
-
-
-### Faza 1:
-* Playlist cu elemente de tip div, urmând să fie adăugat template cu video și info într-o fază ulterioară.
-* Navigare prin playlist, la click pe un element din playlist, acesta este afișat în canvas.
-* Elementul care este în canvas, va fi evidențiat în playlist.
-* Modificare ordine elemente în playlist.
-* Ștergere elemente din playlist.
-
-### Faza 2:
-* Trecere automată la elementul următor după un interval de timp. Intervalul va fi o variabilă, care ulterior va fi preluată ca fiind durata unui videoclip.
-* Adăugarea de noi elemente prin drag and drop sau prin intermediul unui control de tip input.
-
-### Faza 3:
-* Desenare video și controale semintransparente (previous, play/pause, next, progress bar și volum) pe același element canvas (suprapuse peste fluxul video).
-* Determinarea poziției cursorului în cadrul canvasului.
-* Crearea template-ului pentru obiectele din listă: preview/thumbnail video, titlu, durată.
-
-### Faza 4:
-* Aplicare de efecte video selectabile de către utilizator cu ajutorul unui element de tip canvas (efecte diferite față de cele implementate la seminar, fără implementări cu ajutorul CSS).
-
-### Faza 5: 
-* Implementare funcționalitate de preview cadru (atunci când cursorul este deasupra progress bar-ului).
-
-### Faza 6: 
-* Afișsare subtitrări (stocate sub formă de fișiere JSON în cadrul aplicației).
-
-### Faza 7:
-* Stocare setări (ex: nivel volum, poziție curentă în cadrul playlist-ului) cu ajutorul Web Storage API.
-
-### Faza 8:
-* Final touches and styling.
