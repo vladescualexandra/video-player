@@ -4,13 +4,23 @@
         <title>Video Player</title>
         <link rel="stylesheet" href="2_1088_VLADESCU_AlexandraBianca.css">
     </header>
-    <body>
+    <body onresize="setupList()">
+    
         <div id="left-side">
-          <canvas id="video" >
+          <canvas id="video" >           
           </canvas>
         </div>
 
+       
         <div id="right-side">
+            <label id="labelAdd" >
+                Add new video
+                <input id="btnAdd" type="file" onclick="addNewVideo()">
+            </label>
+        
+           <div id="container">
+
+           </div>
         </div>
         
 

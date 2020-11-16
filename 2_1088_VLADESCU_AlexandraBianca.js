@@ -1,3 +1,4 @@
+
 const url1 = 'media/video1.mp4';
 const url2 = 'media/video2.mp4';
 const url3 = 'media/video3.mp4';
@@ -28,35 +29,53 @@ let canvas = document.querySelector('canvas');
 let context = canvas.getContext('2d');
 
 
-let container = document.querySelector('#right-side');
+let container = document.querySelector('#container');
 
+let containerW;
+let containerH;
 let containerX;
 let containerY;
-let itemH = 100;
+let itemH;
 let itemW = container.getBoundingClientRect().width - containerX;
 let marginBottom = 10;
 
 let listItems = [];
 
 function setupList() {
+    
+    container.innerHTML = ""
+
+    containerW = container.getBoundingClientRect().width;
+    containerH = container.getBoundingClientRect().height;
     containerX = container.getBoundingClientRect().x;
     containerY = container.getBoundingClientRect().y;
+
+    // itemH = containerH/list.length;
+
 
     for (let item=0; item < list.length; item++) {
 
         listItems[item] = document.createElement('div');
         listItems[item].className = "card";
+        
+
         let title = document.createElement('h3');
 
         title.innerText= list[item].title;
 
         listItems[item].appendChild(title);
-
-        container.appendChild(listItems[item]);
+        listItems[item].innerHTML += `<img class="delete"
+        onclick="deleteVideo(${item})" src="media/delete.png"> 
+        </img>`;
+        listItems[item].innerHTML += `<img class="move"
+        onclick="moveVideo(${item})" src="media/move.png"> 
+        </img>`;
+        container.append(listItems[item]);
 
         list[item].x = listItems[item].getBoundingClientRect().x;
         list[item].y = listItems[item].getBoundingClientRect().y;
-        
+        itemH = listItems[item].getBoundingClientRect().height;
+
     }
 
 }
@@ -85,8 +104,7 @@ function mouseDown() {
 
             let itemArea =  mx >= list[i].x && 
                             my >= list[i].y && 
-                            my <= list[i].y+itemH;
-            
+                            my <= list[i].y + itemH;
     
             if (itemArea) {
                 playItem(i);               
@@ -99,10 +117,8 @@ function mouseDown() {
 }
 
 function playItem(i) {
-    // setInterval(() => {
         text.innerText = list[i].title;
         listItems[i].style = 'background-color: rgb(45, 58, 58, 0.3);';
-    // }, 1000);
 }
 
 function finishItem(i) {
@@ -115,29 +131,37 @@ function mouseUp() {
     display.appendChild(text);
 }
 
+
+
 function startPlaylist() {
     setupList();
 
-
-    for (let i=0; i<listItems.length; i++) {
-        // setTimeout(() => {
-        //     playItem(i);
-    
-        //     setTimeout(() => {
-        //         finishItem(i);
-               
-        //     }, 5000);
-        // }, 20);
-
-        // if (i===listItems.length-1) {
-        //     i=0;
-        // }
-    }
+   
 
 }
 
+function addNewVideo() {
+    list.push({
+        title: "new video"
+    });
+
+    setupList();
+}
+
+function deleteVideo(id) {
+    list.splice(id, 1);
+    setupList();
+}
+
+function moveVideo(id) {
+    console.log(id);
+}
+
+
+
 
 document.addEventListener('DOMContentLoaded', startPlaylist);
+document.addEventListener('onresize', setupList);
 document.addEventListener('mousedown', mouseDown);
 document.addEventListener('mouseup', mouseUp);
 document.addEventListener('mousemove', mouseMove);
