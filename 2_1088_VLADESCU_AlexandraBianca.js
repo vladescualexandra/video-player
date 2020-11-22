@@ -65,10 +65,12 @@ function setupList() {
 
         listItems[item].appendChild(title);
         listItems[item].innerHTML += `<img class="delete"
-        onclick="deleteVideo(${item})" src="media/delete.png"> 
+        onclick="deleteVideo(${item})" src="media/delete.png"
+        alt="delete"> 
         </img>`;
         listItems[item].innerHTML += `<img class="move"
-        onclick="moveVideo(${item})" src="media/move.png"> 
+        onclick="moveVideo(${item})" src="media/move.png"
+        alt="move"> 
         </img>`;
         container.append(listItems[item]);
 
@@ -154,7 +156,25 @@ function deleteVideo(id) {
 }
 
 function moveVideo(id) {
-    console.log(id);
+   for (let i=0; i<listItems.length; i++) {
+       if (i !== id) {
+            listItems[i].style = 'background-color: rgb(32,153,80, 0.3)';
+            let move = listItems[i].querySelector('.move');
+            move.setAttribute('src', 'media/move_here.png');
+
+            move.addEventListener('click', () => {
+                console.log(list[i].title);
+                console.log(list[id].title);
+                let aux = list[i]; 
+                // i = locul in care va fi mutat
+                list[i] = list[id] // elementul cu care va fi inlocuit 
+                list[id] = aux; // interschimbare
+                setupList();
+                console.log(list[i].title);
+                console.log(list[id].title);
+            });  
+        }
+    }
 }
 
 
