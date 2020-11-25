@@ -1,48 +1,28 @@
-
+const url0 = 'media/movie.mp4';
 const url1 = 'media/video1.mp4';
 const url2 = 'media/video2.mp4';
 const url3 = 'media/video3.mp4';
 const url4 = 'media/video4.mp4';
-const url5 = 'media/video5.mp4';
 
-let list = [
-    {
-        title: 'name-0',
-    },
-    {
-        title: 'name-1',
-    },
-    {
-        title: 'name-2',
-    },
-    {
-        title: 'name-3',
-    },
-    {
-        title: 'name-4',
-    }
-];
+let list = [url0, url1, url2, url3, url4];;
 
-
-
-let canvas = document.querySelector('canvas');
-let context = canvas.getContext('2d');
-
-
-let container = document.querySelector('#container');
-
+let canvas, context, video, source, container;
+let mx = 0, my = 0;
+let W, H;
 let containerW;
 let containerH;
 let containerX;
 let containerY;
 let itemH;
-let itemW = container.getBoundingClientRect().width - containerX;
+let itemW;
 let marginBottom = 10;
+let display;
+let listItems;
 
-let listItems = [];
+let index = 0;
+
 
 function setupList() {
-    
     container.innerHTML = ""
 
     containerW = container.getBoundingClientRect().width;
@@ -57,13 +37,15 @@ function setupList() {
 
         listItems[item] = document.createElement('div');
         listItems[item].className = "card";
-        
+     
+        let vidDim = containerW / 3;
 
-        let title = document.createElement('h3');
-
-        title.innerText= list[item].title;
-
-        listItems[item].appendChild(title);
+        listItems[item].innerHTML = `<video width="${vidDim}" 
+                        alt="video-preview"
+                        style="margin-top: 10px; 
+                        margin-bottom: 10px;">
+                        <source src=${list[item]} type="video/mp4">
+                        </video>`;
         listItems[item].innerHTML += `<img class="delete"
         onclick="deleteVideo(${item})" src="media/delete.png"
         alt="delete"> 
@@ -72,18 +54,14 @@ function setupList() {
         onclick="moveVideo(${item})" src="media/move.png"
         alt="move"> 
         </img>`;
+
         container.append(listItems[item]);
 
-        list[item].x = listItems[item].getBoundingClientRect().x;
-        list[item].y = listItems[item].getBoundingClientRect().y;
         itemH = listItems[item].getBoundingClientRect().height;
-
     }
-
 }
 
 
-let mx, my;
 function mouseMove(e) {
 
     mx = e.x;
@@ -92,66 +70,94 @@ function mouseMove(e) {
 }
 
 
-let W = canvas.width;
-let H = canvas.height;
-
-
-let display = document.querySelector('#left-side');
-let text = document.createElement('h1');
 
 function mouseDown() {
 
     if (mx >= containerX) {
-        for (let i=0;  i< list.length; i++) {
+        for (let i=0;  i < list.length; i++) {
 
-            let itemArea =  mx >= list[i].x && 
-                            my >= list[i].y && 
-                            my <= list[i].y + itemH;
-    
+            let itemArea =  mx >= listItems[i].getBoundingClientRect().x && 
+                            my >= listItems[i].getBoundingClientRect().y && 
+                            my <= listItems[i].getBoundingClientRect().y + itemH;
+
             if (itemArea) {
-                playItem(i);               
+                playItem(i);
             } else {
                 finishItem(i);
             }
-        }
+        }        
     }
 
 }
 
 function playItem(i) {
-        text.innerText = list[i].title;
-        listItems[i].style = 'background-color: rgb(45, 58, 58, 0.3);';
+    // Stergere scena.
+    context.fillStyle = 'black';
+    context.fillRect(0, 0, W, H);
+    listItems[i].style = 'background-color: rgb(45, 58, 58, 0.3);';
+    video.src = list[i];
+    video.load();
+    video.play();
+    drawVideo();
+    index = i;
+
 }
 
 function finishItem(i) {
     listItems[i].style = 'background-color: #040F0F;';
+}
 
+
+
+function drawVideo() {
+    context.drawImage(video, 0, 0, W, H);
+    requestAnimationFrame(drawVideo);
 }
 
 
 function mouseUp() {
-    display.appendChild(text);
 }
 
 
 
 function startPlaylist() {
+
+
+    canvas = document.querySelector('canvas');
+    context = canvas.getContext('2d');
+    video = document.querySelector('video');
+    source = document.querySelector('#videoSource');
+    container = document.querySelector('#container');
+    itemW = container.getBoundingClientRect().width - containerX;
+    W = canvas.width;
+    H = canvas.height;
+    display = document.querySelector('#left-side');
+    listItems = [];    
+
     setupList();
-
-   
-
+    playItem(0);    
+    
+    video.addEventListener("ended", () => {
+        console.log("Video " + index + " ended.");
+        index++;
+        if (index >= list.length) {
+            index = 0;
+        };
+        playItem(index);
+        console.log("Playing video " + index + " now.");
+    });
+ 
 }
 
-function addNewVideo() {
-    list.push({
-        title: "new video"
-    });
 
+function addNewVideo() {
+    list.push("media/movie.mp4");
     setupList();
 }
 
 function deleteVideo(id) {
     list.splice(id, 1);
+    console.log("Deleted item " + id)
     setupList();
 }
 
@@ -163,15 +169,12 @@ function moveVideo(id) {
             move.setAttribute('src', 'media/move_here.png');
 
             move.addEventListener('click', () => {
-                console.log(list[i].title);
-                console.log(list[id].title);
                 let aux = list[i]; 
                 // i = locul in care va fi mutat
                 list[i] = list[id] // elementul cu care va fi inlocuit 
                 list[id] = aux; // interschimbare
                 setupList();
-                console.log(list[i].title);
-                console.log(list[id].title);
+                console.log("Moved from " + id + " to " + i);
             });  
         }
     }
