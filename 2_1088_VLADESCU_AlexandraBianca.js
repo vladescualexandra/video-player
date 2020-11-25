@@ -1,4 +1,4 @@
-const url0 = 'media/movie.mp4';
+const url0 = 'media/video0.mp4';
 const url1 = 'media/video1.mp4';
 const url2 = 'media/video2.mp4';
 const url3 = 'media/video3.mp4';
@@ -21,6 +21,7 @@ let listItems;
 
 let index = 0;
 
+let vW, vH;
 
 function setupList() {
     container.innerHTML = ""
@@ -92,12 +93,15 @@ function mouseDown() {
 
 function playItem(i) {
     // Stergere scena.
-    context.fillStyle = 'black';
-    context.fillRect(0, 0, W, H);
+    // context.fillStyle = 'black';
+    // context.fillRect(0, 0, W, H);
     listItems[i].style = 'background-color: rgb(45, 58, 58, 0.3);';
     video.src = list[i];
     video.load();
     video.play();
+
+    video.addEventListener('loadeddata', () => {
+    });
     drawVideo();
     index = i;
 
@@ -107,10 +111,33 @@ function finishItem(i) {
     listItems[i].style = 'background-color: #040F0F;';
 }
 
+function drawControls() {
 
+    // desenare bara controale
+    context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    context.fillRect(0, H - 10, W, H);
+
+    // desenare progress bar
+    let progress = 25;
+    let duration = 75;
+    context.fillStyle = 'rgba(255, 0, 0, 0.7)';
+    context.fillRect(0, H-10, progress * W / duration, 2);
+   
+    // desenare butoane 
+    let buttonSize = 20;
+    context.fillStyle = 'white';
+    context.strokeStyle = 'white';
+    context.lineWidth = 4;
+
+
+    requestAnimationFrame(drawControls);
+
+}
 
 function drawVideo() {
+
     context.drawImage(video, 0, 0, W, H);
+    drawControls();
     requestAnimationFrame(drawVideo);
 }
 
@@ -132,8 +159,8 @@ function startPlaylist() {
     W = canvas.width;
     H = canvas.height;
     display = document.querySelector('#left-side');
-    listItems = [];    
-
+    listItems = [];  
+      
     setupList();
     playItem(0);    
     
