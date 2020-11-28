@@ -36,17 +36,6 @@ body {
     margin-top: 20px;
 }
 
-#video {
-    background-color: #FCFFFC;
-    width: 800px;
-    height: 400px;
-    position: absolute; 
-    top: 50%;
-    left: 50%;
-    margin-left: -400px; 
-    margin-top: -200px;
-    
-}
 
 .card {
     border-bottom: 1px solid #FCFFFC;
