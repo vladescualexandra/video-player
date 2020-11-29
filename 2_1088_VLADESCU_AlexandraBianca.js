@@ -19,7 +19,7 @@ let marginBottom = 10;
 let display;
 let listItems;
 let buttonSize;
-
+let input;
 let index = 0;
 
 let vW, vH;
@@ -41,6 +41,7 @@ function setup() {
     itemW = container.getBoundingClientRect().width - containerX;
     display = document.querySelector('#left-side');
     auxVideo = document.createElement('video');
+    input = document.querySelector('input');
 
     W = canvas.width = 0.7 * display.getBoundingClientRect().width;
     H = canvas.height = 0.7 * display.getBoundingClientRect().height;
@@ -92,6 +93,8 @@ function setup() {
     volumeBarWidth = 0.2 * W;
     volumeLevel = video.volume * volumeBarWidth;
     volumeX = W - 80;
+
+    input.addEventListener('change', addNewVideo, false);
 }
 
 let frameW;
@@ -286,6 +289,7 @@ function canvasClick(e) {
 }
 
 function next(delta) {
+    finishItem(index);
     index = index + delta;
     if (index >= list.length) {
         index = 0;
@@ -314,7 +318,8 @@ function mouseUp() {
 function startPlaylist() {
 
     setup();
-    playItem(0);    
+    // playItem(0);
+    next(0);    
     
     video.addEventListener("ended", () => {
         next(1);
@@ -324,9 +329,11 @@ function startPlaylist() {
  
 }
 
-
 function addNewVideo() {
-    list.push("media/movie.mp4");
+
+    let file = this.files[0];
+    let fileURL = URL.createObjectURL(file);
+    list.push(fileURL);    
     setup();
 }
 
