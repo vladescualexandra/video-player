@@ -4,7 +4,33 @@ const url2 = 'media/video2.mp4';
 const url3 = 'media/video3.mp4';
 const url4 = 'media/video4.mp4';
 
-let list = [url0, url1, url2, url3, url4];
+let json0 = 'media/video0.json';
+
+let list = [{
+    title: 'Caption settings on YouTube',
+    url: url0, 
+    subtitles: json0
+    },
+    {
+        title: 'video1',
+        url: url1, 
+        subtitles: json0
+    },
+    {
+        title: 'video2',
+        url: url2, 
+        subtitles: json0
+    },
+    {
+        title: 'video3',
+        url: url3, 
+        subtitles: json0
+    },
+    {
+        title: 'video4',
+        url: url4, 
+        subtitles: json0
+    }];
 
 let canvas, context, video, source, container;
 let mx = 0, my = 0;
@@ -24,17 +50,45 @@ let index = 0;
 
 let vW, vH;
 
+
+let frameW;
+let frameH;
+let auxVideo;
+
+
+let volumeBarWidth ;
+let volumeLevel;
+let volumeX;
+
 let pb; // progress Bar
 
 let controlsBarY ;
     let progressBarH; 
     let controlsBarUnderPBy;
 
-
+let subtitlesX;
 let bw = false; // black and white fx
 // let speedRate;
 let speedRateBar;
 let redTint = false, greenTint = false, blueTint;
+
+let subtitlesSwitch = false;
+let captions;
+let captionsArray = [];
+async function readFromJson(json) {
+    let raspuns = await fetch(json);
+    captions = await raspuns.json();
+
+    let i=0;
+    for (let item in captions) {
+        let c = {};
+        c.timestamp = item;
+        c.caption = captions[item];
+        captionsArray.push(c);
+    }
+    captionsArray.sort();
+}
+
 
 function setup() {
 
@@ -48,6 +102,7 @@ function setup() {
     display = document.querySelector('#left-side');
     auxVideo = document.createElement('video');
     addVideoBtn = document.querySelector('#btnAdd');
+    subtitles = document.querySelector('#subtitles');
 
     speedRateBar = document.querySelector('#speedRate');
     red = document.querySelector('red');
@@ -82,7 +137,7 @@ function setup() {
                         alt="video-preview"
                         style="margin-top: 10px; 
                         margin-bottom: 10px;">
-                        <source src=${list[item]} type="video/mp4">
+                        <source src=${list[item].url} type="video/mp4">
                         </video>`;
         listItems[item].innerHTML += `<img class="delete"
         onclick="deleteVideo(${item})" src="media/delete.png"
@@ -106,33 +161,30 @@ function setup() {
     addVideoBtn.addEventListener('change', addNewVideo, false);
 }
 
-
-
-let frameW;
-let frameH;
-let auxVideo;
-
 async function drawFrame() {
 
-    frameW = 0.2 * W;
-    frameH = 0.2 * H;
+        frameW = 0.2 * W;
+        frameH = 0.2 * H;
 
-    context.beginPath();        
-    context.moveTo(0, 0);
-    context.rect(mx - frameW/2, controlsBarY - 0.1*frameH, frameW, -frameH);
-    context.fill();
+        context.beginPath();        
+        context.moveTo(0, 0);
+        context.rect(mx - frameW/2, controlsBarY - 0.1*frameH, frameW, -frameH);
+        context.fill();
 
-    context.drawImage(auxVideo, mx - frameW/2, controlsBarY - 0.1*frameH, frameW, -frameH);
+        context.drawImage(auxVideo, mx - frameW/2, controlsBarY - 0.1*frameH, frameW, -frameH);
 
+    
     requestAnimationFrame(drawFrame);
+    
+
 }
 
 async function mouseMove(e) {
     mx = e.x;
     my = e.y;
 
-    if (my >= canvas.getBoundingClientRect().y + H-0.05*H 
-        && my <= canvas.getBoundingClientRect().y + H-0.05*H + 0.02*H) {
+    if (my >= canvas.getBoundingClientRect().y + H-0.05*H) {
+        if (my <= canvas.getBoundingClientRect().y + H-0.05*H + 0.02*H) {
             mx = e.x - canvas.getBoundingClientRect().x;
 
           
@@ -140,11 +192,10 @@ async function mouseMove(e) {
             auxVideo.currentTime = mx * video.duration / W;
             await auxVideo.pause();
             drawFrame();
+        } 
     } 
     
 }
-
-
 
 function mouseDown() {
 
@@ -173,7 +224,7 @@ function changeSpeedRate() {
 
 async function playItem(i) {
     listItems[i].style = 'background-color: rgb(45, 58, 58, 0.3);';
-    video.src = list[i];
+    video.src = list[i].url;
     auxVideo.src = video.src;
     auxVideo.muted = 'true';
     await auxVideo.load();
@@ -181,20 +232,15 @@ async function playItem(i) {
     await video.play();
     video.muted = false;
     speedRateBar.value = video.playbackRate * 100;
-
+    readFromJson(list[i].subtitles);
     drawVideo();
     index = i;
-
 }
 
 function finishItem(i) {
     listItems[i].style = 'background-color: #040F0F;';
 }
 
-
-let volumeBarWidth ;
-let volumeLevel;
-let volumeX;
 
 function drawControls() {
 
@@ -251,6 +297,17 @@ function drawControls() {
     context.stroke();
 
 
+    // desenare buton subtitrari
+    context.textAlign = 'right';
+    context.textBaseline = 'middle';
+    context.font = '5pt Tahoma';
+    subtitlesX = W - 150;
+    context.fillText('Subtitles', 
+            W - 200, controlsBarUnderPBy + (H-controlsBarUnderPBy)/2);
+    context.fillText(subtitles ? 'On' : 'Off', 
+            subtitlesX, controlsBarUnderPBy + (H-controlsBarUnderPBy)/2); 
+
+
     // desenare buton volum
     context.textAlign = 'right';
     context.textBaseline = 'middle';
@@ -303,8 +360,15 @@ function canvasClick(e) {
                 volumeLevel = vol;
                 // console.log(video.volume);
             }
+
         }
+
+     
     }       
+}
+
+function setSubtitles() {
+    subtitlesSwitch = !subtitlesSwitch;
 }
 
 function next(delta) {
@@ -342,9 +406,8 @@ function setTint(id) {
 
 function drawVideo() {
 
- 
-
     context.drawImage(video, 0, 0, W, H);
+
 
     let imageData = context.getImageData(0, 0, W, H);
     let v = imageData.data;
@@ -379,22 +442,44 @@ function drawVideo() {
         }
     }
 
+
+
     context.putImageData(imageData, 0, 0);
-    
+    if (subtitlesSwitch) {
+        drawCaptions();
+    }
     drawControls();
     requestAnimationFrame(drawVideo);
 }
 
+let i = 0;
+function drawCaptions() {
+    if (captionsArray[i]) {
+        if (video.currentTime <parseFloat(captionsArray[i+1].timestamp)) {
+            // console.log(captionsArray[i+1].caption);
+            context.beginPath();
+            context.fillStyle = 'black';
+            context.moveTo(0, controlsBarY - 0.1 * H);
+            context.rect(0, controlsBarY - 0.1 * H, W, 20);
+            context.fill();
 
-function mouseUp() {
+            context.beginPath();
+            context.fillStyle = 'pink';
+            context.textAlign = 'center';
+            context.textBaseline = 'left';
+            context.font = '7pt Tahoma';
+            context.fillText(captionsArray[i].caption, W/2, controlsBarY - 0.1 * H + 10);
+        } else {
+            if (i < captionsArray.length - 1) {
+                i++;
+            }
+        
+        }
+    }   
 }
 
-
-
 function startPlaylist() {
-
     setup();
-    // playItem(0);
     next(0);    
     
     video.addEventListener("ended", () => {
@@ -440,11 +525,9 @@ function moveVideo(id) {
 
 
 
-
 document.addEventListener('DOMContentLoaded', startPlaylist);
 document.addEventListener('onresize', setup);
 document.addEventListener('mousedown', mouseDown);
-document.addEventListener('mouseup', mouseUp);
 document.addEventListener('mousemove', mouseMove);
 
 
