@@ -12,6 +12,28 @@
               <video controls="controls" autoplay="autoplay" muted="muted">
             </video>           
           </canvas>
+            <form id="fxForm">
+                <span>
+                    <label for="red">Add red tint</label>
+                    <input id="red" name="red" type="checkbox" onchange="setTint(0)"/>
+                </span>
+                <span>
+                    <label for="green">Add green tint</label>
+                    <input id="green" name="green" type="checkbox" onchange="setTint(1)"/>
+                </span>
+                <span>
+                    <label for="blue">Add blue tint</label>
+                    <input id="blue" name="blue" type="checkbox" onchange="setTint(2)"/>
+                </span>
+                <span>
+                    <label for="bw">Black and white</label>
+                    <input id="bw" name="bw" type="checkbox" onchange="setBW()"/>
+                </span>
+                <span>  
+                    <label for="speedRate">Speed rate</label>
+                    <input id="speedRate" name="speedRate" type="range" max="500" min="20" onchange="changeSpeedRate()">
+                </span>
+            </form>
         </div>
 
        

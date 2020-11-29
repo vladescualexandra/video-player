@@ -19,7 +19,7 @@ let marginBottom = 10;
 let display;
 let listItems;
 let buttonSize;
-let input;
+let addVideoBtn;
 let index = 0;
 
 let vW, vH;
@@ -29,6 +29,12 @@ let pb; // progress Bar
 let controlsBarY ;
     let progressBarH; 
     let controlsBarUnderPBy;
+
+
+let bw = false; // black and white fx
+// let speedRate;
+let speedRateBar;
+let redTint = false, greenTint = false, blueTint;
 
 function setup() {
 
@@ -41,7 +47,10 @@ function setup() {
     itemW = container.getBoundingClientRect().width - containerX;
     display = document.querySelector('#left-side');
     auxVideo = document.createElement('video');
-    input = document.querySelector('input');
+    addVideoBtn = document.querySelector('#btnAdd');
+
+    speedRateBar = document.querySelector('#speedRate');
+    red = document.querySelector('red');
 
     W = canvas.width = 0.7 * display.getBoundingClientRect().width;
     H = canvas.height = 0.7 * display.getBoundingClientRect().height;
@@ -94,8 +103,10 @@ function setup() {
     volumeLevel = video.volume * volumeBarWidth;
     volumeX = W - 80;
 
-    input.addEventListener('change', addNewVideo, false);
+    addVideoBtn.addEventListener('change', addNewVideo, false);
 }
+
+
 
 let frameW;
 let frameH;
@@ -129,8 +140,8 @@ async function mouseMove(e) {
             auxVideo.currentTime = mx * video.duration / W;
             await auxVideo.pause();
             drawFrame();
-
-        } 
+    } 
+    
 }
 
 
@@ -154,6 +165,12 @@ function mouseDown() {
 
 }
 
+function changeSpeedRate() {
+    // speedRateBar.value = video.playbackRate * 100;
+    video.playbackRate = speedRateBar.value / 100;
+    console.log(speedRateBar.value);
+}
+
 async function playItem(i) {
     listItems[i].style = 'background-color: rgb(45, 58, 58, 0.3);';
     video.src = list[i];
@@ -163,6 +180,8 @@ async function playItem(i) {
     await video.load();
     await video.play();
     video.muted = false;
+    speedRateBar.value = video.playbackRate * 100;
+
     drawVideo();
     index = i;
 
@@ -302,9 +321,66 @@ function next(delta) {
 
 }
 
+
+function setBW() {
+    bw = !bw;
+}
+
+function setTint(id) {
+    switch(id) {
+        case 0:
+            redTint = !redTint;
+            break;
+        case 1:
+            greenTint = !greenTint;
+            break;
+        case 2:
+            blueTint = !blueTint;
+            break;
+    }
+}
+
 function drawVideo() {
 
+ 
+
     context.drawImage(video, 0, 0, W, H);
+
+    let imageData = context.getImageData(0, 0, W, H);
+    let v = imageData.data;
+
+    if (bw) {
+        for (let i=0; i<v.length; i+= 4) {
+            let avg = (v[i] + v[i+1] + v[i+2]) / 3;
+            v[i] = avg;
+            v[i+1] = avg;
+            v[i+2] = avg;
+        }
+    } 
+
+    if (redTint) {
+        for (let i=0; i<v.length; i+= 4) {
+            let avg = (v[i] + v[i+1] + v[i+2]) / 3;
+            v[i] = avg;
+        }
+    }
+
+    if (greenTint) {
+        for (let i=0; i<v.length; i+= 4) {
+            let avg = (v[i] + v[i+1] + v[i+2]) / 3;
+            v[i+1] = avg;
+        }
+    }
+
+    if (blueTint) {
+        for (let i=0; i<v.length; i+= 4) {
+            let avg = (v[i] + v[i+1] + v[i+2]) / 3;
+            v[i+2] = avg;
+        }
+    }
+
+    context.putImageData(imageData, 0, 0);
+    
     drawControls();
     requestAnimationFrame(drawVideo);
 }
