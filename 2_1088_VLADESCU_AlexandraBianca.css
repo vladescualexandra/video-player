@@ -63,7 +63,9 @@ body {
 }
 
 form span {
-    display: inline-flex;
+    display: block;
+    font-size: 10pt;
 }
+
 
 
