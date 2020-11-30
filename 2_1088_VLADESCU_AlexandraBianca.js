@@ -70,11 +70,15 @@ let subtitlesX;
 let bw = false; // black and white fx
 // let speedRate;
 let speedRateBar;
-let redTint = false, greenTint = false, blueTint;
+let redTint, greenTint, blueTint;
 
 let subtitlesSwitch = false;
 let captions;
 let captionsArray = [];
+
+let selectStorage;
+let myStorage;
+
 async function readFromJson(json) {
     let raspuns = await fetch(json);
     captions = await raspuns.json();
@@ -103,9 +107,10 @@ function setup() {
     auxVideo = document.createElement('video');
     addVideoBtn = document.querySelector('#btnAdd');
     subtitles = document.querySelector('#subtitles');
-
+    selectStorage = document.querySelector('select');
     speedRateBar = document.querySelector('#speedRate');
-    red = document.querySelector('red');
+
+
 
     W = canvas.width = 0.7 * display.getBoundingClientRect().width;
     H = canvas.height = 0.7 * display.getBoundingClientRect().height;
@@ -150,15 +155,62 @@ function setup() {
 
         container.append(listItems[item]);
 
-        itemH = listItems[item].getBoundingClientRect().height;
+        itemH = listItems[item].getBoundingClientRect().height;        
     }
 
 
     volumeBarWidth = 0.2 * W;
-    volumeLevel = video.volume * volumeBarWidth;
+    volumeLevel = video.volume / 100 * volumeBarWidth;
     volumeX = W - 80;
 
     addVideoBtn.addEventListener('change', addNewVideo, false);
+    
+    getStorage();
+
+
+}
+
+
+function getStorage() {
+
+    index = parseInt(window.sessionStorage.getItem('index'));
+
+    volumeLevel = parseFloat(window.sessionStorage.getItem('volume'));
+    
+    subtitlesSwitch =  window.sessionStorage.getItem('subtitles') == 'true';
+    document.querySelector('#subtitles').checked = subtitlesSwitch;
+
+    redTint =  window.sessionStorage.getItem('redTint') == 'true';
+    document.querySelector('#red').checked = redTint;
+
+    greenTint =  window.sessionStorage.getItem('greenTint') == 'true';
+    document.querySelector('#green').checked = greenTint;
+
+    blueTint =  window.sessionStorage.getItem('blueTint') == 'true';
+    document.querySelector('#blue').checked = blueTint;
+
+    bw =  window.sessionStorage.getItem('bw') == 'true';
+    document.querySelector('#bw').checked = bw;
+
+    speedRateBar.value = parseFloat(window.sessionStorage.getItem('speedRate')); 
+    console.log(speedRateBar.value);
+}
+
+function setTint(id) {
+    switch(id) {
+        case 0:
+            redTint = !redTint;
+            window.sessionStorage.setItem('redTint', redTint);
+            break;
+        case 1:
+            greenTint = !greenTint;
+            window.sessionStorage.setItem('greenTint', greenTint);
+            break;
+        case 2:
+            blueTint = !blueTint;
+            window.sessionStorage.setItem('blueTint', blueTint);
+            break;
+    }
 }
 
 async function drawFrame() {
@@ -174,10 +226,12 @@ async function drawFrame() {
         context.drawImage(auxVideo, mx - frameW/2, controlsBarY - 0.1*frameH, frameW, -frameH);
 
     
-    requestAnimationFrame(drawFrame);
+        // setInterval(drawFrame, 30);
+        requestAnimationFrame(drawFrame);
     
 
 }
+
 
 async function mouseMove(e) {
     mx = e.x;
@@ -217,24 +271,24 @@ function mouseDown() {
 }
 
 function changeSpeedRate() {
-    // speedRateBar.value = video.playbackRate * 100;
     video.playbackRate = speedRateBar.value / 100;
-    console.log(speedRateBar.value);
+    window.sessionStorage.setItem('speedRate', speedRateBar.value);
 }
 
 async function playItem(i) {
-    listItems[i].style = 'background-color: rgb(45, 58, 58, 0.3);';
-    video.src = list[i].url;
-    auxVideo.src = video.src;
-    auxVideo.muted = 'true';
-    await auxVideo.load();
-    await video.load();
-    await video.play();
-    video.muted = false;
-    speedRateBar.value = video.playbackRate * 100;
-    readFromJson(list[i].subtitles);
-    drawVideo();
-    index = i;
+        listItems[i].style = 'background-color: rgb(45, 58, 58, 0.3);';
+        video.src = list[i].url;
+        auxVideo.src = video.src;
+        auxVideo.muted = 'true';
+        await auxVideo.load();
+        await video.load();
+        await video.play();
+        video.muted = false;
+        readFromJson(list[i].subtitles);
+        drawVideo();
+        index = i;
+        window.sessionStorage.setItem('index', index);
+
 }
 
 function finishItem(i) {
@@ -316,16 +370,21 @@ function drawControls() {
 
     context.strokeStyle = 'gray';
     context.lineWidth = 5;
+    
+    
     context.beginPath();
     context.moveTo(W - 80, controlsBarUnderPBy + (H-controlsBarUnderPBy)/2);
     context.lineTo(W - 80 + volumeBarWidth, controlsBarUnderPBy + (H-controlsBarUnderPBy)/2);
     context.stroke();
 
+    
+
     context.strokeStyle = 'white';
     context.beginPath();
     context.moveTo(W - 80, controlsBarUnderPBy + (H-controlsBarUnderPBy)/2);
-    context.lineTo(W - 80 + volumeLevel, controlsBarUnderPBy + (H-controlsBarUnderPBy)/2);
+    context.lineTo(W - 80 + volumeLevel * 100, controlsBarUnderPBy + (H-controlsBarUnderPBy)/2);
     context.stroke();
+
 
     requestAnimationFrame(drawControls);
 
@@ -351,24 +410,20 @@ function canvasClick(e) {
                     break;
             }
 
-            // let volumeBarWidth = 0.2 * W;
-            // let volumeLevel = video.volume * volumeBarWidth;
-            // let volumeX = W - 80;
             if (mx >= volumeX && mx <= volumeX + volumeBarWidth) {
                 let vol = mx - volumeX;
                 video.volume = vol / volumeBarWidth;
-                volumeLevel = vol;
-                // console.log(video.volume);
-            }
+                volumeLevel = vol / 100;
+                window.sessionStorage.setItem('volume', volumeLevel);
+            } 
 
         }
-
-     
-    }       
+    }  
 }
 
 function setSubtitles() {
     subtitlesSwitch = !subtitlesSwitch;
+    window.sessionStorage.setItem('subtitles', subtitlesSwitch);
 }
 
 function next(delta) {
@@ -381,6 +436,7 @@ function next(delta) {
     if (index < 0) {
         index = list.length - 1;
     }
+    window.sessionStorage.setItem('index', index);
     playItem(index);
 
 }
@@ -388,21 +444,10 @@ function next(delta) {
 
 function setBW() {
     bw = !bw;
+    window.sessionStorage.setItem('bw', bw);
 }
 
-function setTint(id) {
-    switch(id) {
-        case 0:
-            redTint = !redTint;
-            break;
-        case 1:
-            greenTint = !greenTint;
-            break;
-        case 2:
-            blueTint = !blueTint;
-            break;
-    }
-}
+
 
 function drawVideo() {
 
@@ -487,7 +532,6 @@ function startPlaylist() {
     });
 
     canvas.addEventListener('click', canvasClick);
- 
 }
 
 function addNewVideo() {
@@ -526,9 +570,9 @@ function moveVideo(id) {
 
 
 document.addEventListener('DOMContentLoaded', startPlaylist);
+
 document.addEventListener('onresize', setup);
 document.addEventListener('mousedown', mouseDown);
 document.addEventListener('mousemove', mouseMove);
-
 
 // Colors: https://coolors.co/040f0f-248232-2ba84a-2d3a3a-fcfffc

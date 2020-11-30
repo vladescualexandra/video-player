@@ -63,7 +63,7 @@ body {
 }
 
 form span {
-    display: block;
+    display: inline-flex;
 }
 
 
