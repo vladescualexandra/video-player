@@ -200,9 +200,7 @@ function canvasClick(e) {
         addVideoBtn = document.querySelector('#btnAdd');
         addVideoBtn.addEventListener('change', addNewVideo, false);
         fxForm = document.querySelector('#fxForm');
-        fxForm.getBoundingClientRect().x  = 200;
-        //= canvas.getBoundingClientRect().x;
-    
+
         speedRateBar = document.querySelector('#speedRate');
     }
     
@@ -225,6 +223,7 @@ function canvasClick(e) {
         buttonSize = 0.05 * W;
         volumeBarWidth = 0.2 * W;
         volumeX = buttonSize * 5;
+        volumeLevel = video.volume;
         subtitlesX = buttonSize * 13;
     }
     
@@ -334,7 +333,7 @@ async function playItem(i) {
 }
 
 function finishItem(i) {
-listItems[i].style = 'background-color: #040F0F;';
+    listItems[i].style = 'background-color: #040F0F;';
 }
 
 function next(delta) {
