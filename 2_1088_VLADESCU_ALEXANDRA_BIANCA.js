@@ -247,11 +247,11 @@ function canvasClick(e) {
                             <source src=${list[item].url} type="video/mp4">
                             </video>`;
             listItems[item].innerHTML += `<img class="delete"
-            onclick="deleteVideo(${item})" src="media/delete.png"
+            onclick="deleteVideo(${item})" src="https://www.flaticon.com/svg/static/icons/svg/875/875550.svg"
             alt="delete"> 
             </img>`;
             listItems[item].innerHTML += `<img class="move"
-            onclick="moveVideo(${item})" src="media/move.png"
+            onclick="moveVideo(${item})" src="https://www.flaticon.com/svg/static/icons/svg/617/617836.svg"
             alt="move"> 
             </img>`;
     
@@ -301,7 +301,7 @@ function moveVideo(id) {
        if (i !== id) {
             listItems[i].style = 'background-color: rgb(32,153,80, 0.3)';
             let move = listItems[i].querySelector('.move');
-            move.setAttribute('src', 'media/move_here.png');
+            move.setAttribute('src', 'https://www.flaticon.com/svg/static/icons/svg/466/466154.svg');
 
             move.addEventListener('click', () => {
                 let aux = list[i]; 
