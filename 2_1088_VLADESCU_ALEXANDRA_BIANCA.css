@@ -67,5 +67,8 @@ form span {
     font-size: 10pt;
 }
 
+canvas {
+    border: 1px solid white;
+}
 
 

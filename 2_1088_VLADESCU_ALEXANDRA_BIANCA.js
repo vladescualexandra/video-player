@@ -4,27 +4,27 @@ const url1 = 'media/video1.mp4';
 const url2 = 'media/video2.mp4';
 const url3 = 'media/video3.mp4';
 
-let json0 = 'media/video0.json';
+let jsonSub = 'media/subtitles.json';
 
 let list = [{
         title: 'video0',
         url: url0, 
-        subtitles: json0
+        subtitles: jsonSub
     },
     {
         title: 'video1',
         url: url1, 
-        subtitles: json0
+        subtitles: jsonSub
     },
     {
         title: 'video2',
         url: url2, 
-        subtitles: json0
+        subtitles: jsonSub
     },
     {
         title: 'video3',
         url: url3, 
-        subtitles: json0
+        subtitles: jsonSub
     }];
 
 
@@ -94,11 +94,11 @@ let captionsArray;
 /* Function that starts the playlist */
 function startPlaylist() {
     setup();
-        next(0);    
+    next(0);    
         
-        video.addEventListener("ended", () => {
-            next(1);
-        });
+    video.addEventListener("ended", () => {
+         next(1);
+    });
 
     canvas.addEventListener('click', canvasClick);
 }
@@ -107,11 +107,14 @@ function startPlaylist() {
 function setup() {
     initComponents();
     initDimensions();
-    initPlaylist();
-
+    
     if (window.sessionStorage) {
         getStorage();
+    } else {
+        index = 0;
     }
+
+    initPlaylist();    
 }
 
 /* Mouse functions */
@@ -203,9 +206,6 @@ function canvasClick(e) {
 
         speedRateBar = document.querySelector('#speedRate');
 
-        
-        
-        
         canvas.addEventListener('mouseenter', () => {
             displayControls = true;
         });
@@ -248,38 +248,45 @@ function canvasClick(e) {
         container.innerHTML = ""
     
         for (let item=0; item < list.length; item++) {
-    
-            listItems[item] = document.createElement('div');
-            listItems[item].className = "card";
-         
-            let vidDim = containerW / 3;
-    
-            listItems[item].innerHTML = `<video width="${vidDim}" 
-                            alt="video-preview"
-                            style="margin-top: 10px; 
-                            margin-bottom: 10px;">
-                            <source src=${list[item].url} type="video/mp4">
-                            </video>`;
-            listItems[item].innerHTML += `<img class="delete"
-            onclick="deleteVideo(${item})" src="https://www.flaticon.com/svg/static/icons/svg/875/875550.svg"
-            alt="delete"> 
-            </img>`;
-            listItems[item].innerHTML += `<img class="move"
-            onclick="moveVideo(${item})" src="https://www.flaticon.com/svg/static/icons/svg/617/617836.svg"
-            alt="move"> 
-            </img>`;
-    
-            container.append(listItems[item]);
-    
-            itemH = listItems[item].getBoundingClientRect().height;        
-        }
-    
+
+                listItems[item] = document.createElement('div');
+                listItems[item].className = "card";
+            
+                let vidDim = containerW / 3;
+        
+                listItems[item].innerHTML = `<video width="${vidDim}" 
+                                alt="video-preview"
+                                style="margin-top: 10px; 
+                                margin-bottom: 10px;">
+                                <source src=${list[item].url} type="video/mp4">
+                                </video>`;
+                listItems[item].innerHTML += `<img class="delete"
+                onclick="deleteVideo(${item})" src="https://www.flaticon.com/svg/static/icons/svg/875/875550.svg"
+                alt="delete"> 
+                </img>`;
+                listItems[item].innerHTML += `<img class="move"
+                onclick="moveVideo(${item})" src="https://www.flaticon.com/svg/static/icons/svg/617/617836.svg"
+                alt="move"> 
+                </img>`;
+        
+                container.append(listItems[item]);
+        
+                itemH = listItems[item].getBoundingClientRect().height;        
+            }
     }
 
 /* Storage */
 function getStorage() {
 
-    index = parseInt(window.sessionStorage.getItem('index'));
+    if (JSON.parse(window.sessionStorage.getItem('playlist')) != null) {
+        list = JSON.parse(window.sessionStorage.getItem('playlist'));
+    }
+
+    if ( parseInt(window.sessionStorage.getItem('index'))) {
+        index = parseInt(window.sessionStorage.getItem('index')); 
+    } else {
+        index = 0;
+    }
     volumeLevel = parseFloat(window.sessionStorage.getItem('volume'));
     subtitlesSwitch =  window.sessionStorage.getItem('subtitles') == 'true';
     redTint =  window.sessionStorage.getItem('redTint') == 'true';
@@ -296,17 +303,20 @@ function getStorage() {
 /* Actions on playlist */
 function addNewVideo() {
 
+
     let file = this.files[0];
     let fileURL = URL.createObjectURL(file);
     list.push({
         url: fileURL
-    });    
+    });
+
+    savePlaylist();
     setup();
 }
 
 function deleteVideo(id) {
     list.splice(id, 1);
-    console.log("Deleted item " + id)
+    savePlaylist();
     setup();
 }
 
@@ -322,29 +332,33 @@ function moveVideo(id) {
                 // i = locul in care va fi mutat
                 list[i] = list[id] // elementul cu care va fi inlocuit 
                 list[id] = aux; // interschimbare
+                savePlaylist();
                 setup();
-                console.log("Moved from " + id + " to " + i);
             });  
         }
     }
 }
 
+function savePlaylist() {
+    window.sessionStorage.setItem("playlist", JSON.stringify(list));
+}
+
 /* Playing and finishing video */
 async function playItem(i) {
     listItems[i].style = 'background-color: rgb(45, 58, 58, 0.3);';
+    
     video.src = list[i].url;
+
     auxVideo.src = video.src;
     auxVideo.muted = 'true';
     await auxVideo.load();
     await video.load();
     await video.play();
 
-    // await auxVideo.play();
-    
-
-
     video.muted = false;
-    readFromJson(list[i].subtitles);
+    if (list[i].subtitles) {
+        readFromJson(list[i].subtitles);
+    }
     drawVideo();
     index = i;
     window.sessionStorage.setItem('index', index);
@@ -356,7 +370,9 @@ function finishItem(i) {
 }
 
 function next(delta) {
-    finishItem(index);
+    if (index >= 0 && index < list.length) {
+        finishItem(index);
+    }
     index = index + delta;
     if (index >= list.length) {
         index = 0;
@@ -367,7 +383,6 @@ function next(delta) {
     }
     window.sessionStorage.setItem('index', index);
     playItem(index);
-
 }
 
 
@@ -532,9 +547,9 @@ function drawCaptions() {
             if (i < captionsArray.length - 1) {
                 i++;
             }
-        
         }
-    }   
+          
+    }
 }
 
 /* Switching the effects */
