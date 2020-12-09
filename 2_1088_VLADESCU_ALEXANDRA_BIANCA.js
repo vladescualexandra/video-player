@@ -3,12 +3,11 @@ const url0 = 'media/video0.mp4';
 const url1 = 'media/video1.mp4';
 const url2 = 'media/video2.mp4';
 const url3 = 'media/video3.mp4';
-const url4 = 'media/video4.mp4';
 
 let json0 = 'media/video0.json';
 
 let list = [{
-        title: 'Caption settings on YouTube',
+        title: 'video0',
         url: url0, 
         subtitles: json0
     },
@@ -26,11 +25,6 @@ let list = [{
         title: 'video3',
         url: url3, 
         subtitles: json0
-    },
-    {
-        title: 'video4',
-        url: url4, 
-        subtitles: json0
     }];
 
 
@@ -46,6 +40,8 @@ let mx = 0, my = 0;
 
 /* Canvas dimensios */
 let W, H;
+
+let startPlaylistSwitch = false;
 
 /* Container (playlist) dimensions */
 let containerW;
@@ -64,7 +60,7 @@ let volumeBarWidth;
 
 let index = 0; // The video that is currently playing.
 
-    
+let displayFrame = false;    
 let frameW;
 let frameH;
 let auxVideo;
@@ -76,6 +72,7 @@ let subtitlesX;
 let pb; // progress Bar - how much progress of the video is done
 
 /* Controls bar */
+let displayControls = false;
 let controlsBarY ;
 let progressBarH; 
 let controlsBarUnderPBy;
@@ -97,11 +94,11 @@ let captionsArray;
 /* Function that starts the playlist */
 function startPlaylist() {
     setup();
-    next(0);    
-    
-    video.addEventListener("ended", () => {
-        next(1);
-    });
+        next(0);    
+        
+        video.addEventListener("ended", () => {
+            next(1);
+        });
 
     canvas.addEventListener('click', canvasClick);
 }
@@ -139,17 +136,20 @@ async function mouseMove(e) {
     mx = e.x;
     my = e.y;
 
+
     if (my >= canvas.getBoundingClientRect().y + H-0.05*H) {
         if (my <= canvas.getBoundingClientRect().y + H-0.05*H + 0.02*H) {
             mx = e.x - canvas.getBoundingClientRect().x;
+            displayFrame = true;
+        } else {
+            displayFrame = false;
+        }
+    }
 
-            await auxVideo.play();
-            auxVideo.currentTime = mx * video.duration / W;
-            await auxVideo.pause();
-            drawFrame();
-        } 
-    }   
+    drawFrame();
+
 }
+
 
 function canvasClick(e) {
     mx = e.x - canvas.getBoundingClientRect().x;
@@ -202,6 +202,17 @@ function canvasClick(e) {
         fxForm = document.querySelector('#fxForm');
 
         speedRateBar = document.querySelector('#speedRate');
+
+        
+        
+        
+        canvas.addEventListener('mouseenter', () => {
+            displayControls = true;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            displayControls = false;
+        });
     }
     
     /* Dimensions */
@@ -219,6 +230,9 @@ function canvasClick(e) {
     
         canvas.style = `margin-left: ${marginLR}px; 
                         margin-top: ${marginTB}px;`;
+
+        fxForm.style = `margin-left: ${marginLR}px;
+                        margin-top: ${0.1*marginTB}px;`
     
         buttonSize = 0.05 * W;
         volumeBarWidth = 0.2 * W;
@@ -324,6 +338,11 @@ async function playItem(i) {
     await auxVideo.load();
     await video.load();
     await video.play();
+
+    // await auxVideo.play();
+    
+
+
     video.muted = false;
     readFromJson(list[i].subtitles);
     drawVideo();
@@ -386,22 +405,32 @@ function drawVideo() {
 
 /* Drawing the frames */
 async function drawFrame() {
+
+    
     frameW = 0.2 * W;
     frameH = 0.2 * H;
+    
+    if (displayFrame) {
 
-    context.beginPath();        
-    context.moveTo(0, 0);
-    context.rect(mx - frameW/2, controlsBarY - 0.1*frameH, frameW, -frameH);
-    context.fill();
+        auxVideo.currentTime = Math.round(mx * video.duration / W);
+        auxVideo.pause();  
+            
+        context.beginPath();        
+        context.moveTo(0, 0);
+        context.rect(mx - frameW/2, controlsBarY - 0.1*frameH, frameW, -frameH);
+        context.fill();
 
-    context.drawImage(auxVideo, mx - frameW/2, controlsBarY - 0.1*frameH, frameW, -frameH);
+        context.drawImage(auxVideo, mx - frameW/2, controlsBarY - 0.1*frameH, frameW, -frameH);
+        requestAnimationFrame(drawFrame);
+    
+    } 
 
-    requestAnimationFrame(drawFrame);
-}
+} 
+
 
 /* Drawing the controls */
 function drawControls() {
-
+    if (displayControls) {
     controlsBarY = H - 0.07 * H;
     progressBarH = 0.02 * H; 
     controlsBarUnderPBy = controlsBarY + progressBarH;
@@ -477,7 +506,7 @@ function drawControls() {
     context.strokeStyle = 'rgb(255, 255, 255, 0.7)';
     let sub = 'Subtitles: ' + (subtitlesSwitch ? 'On' : 'Off');  
     context.fillText(sub, subtitlesX, controlsBarUnderPBy + (H-controlsBarUnderPBy)/2);
-
+    }
     requestAnimationFrame(drawControls);
 }
 
@@ -561,7 +590,8 @@ async function readFromJson(json) {
     captionsArray.sort();
 }
 
-document.addEventListener('DOMContentLoaded', startPlaylist);
+
+document.addEventListener('DOMContentLoaded', startPlaylist)
 document.addEventListener('onresize', setup);
 document.addEventListener('mousedown', mouseDown);
 document.addEventListener('mousemove', mouseMove);
