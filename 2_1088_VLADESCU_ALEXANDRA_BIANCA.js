@@ -350,10 +350,12 @@ async function playItem(i) {
     video.src = list[i].url;
 
     auxVideo.src = video.src;
+    // auxVideo.muted = 'true';
     await auxVideo.load();
     await video.load();
     await video.play();
 
+    // video.muted = false;
     if (list[i].subtitles) {
         readFromJson(list[i].subtitles);
     }
