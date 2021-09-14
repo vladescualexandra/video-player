@@ -261,11 +261,11 @@ function canvasClick(e) {
                                 <source src=${list[item].url} type="video/mp4">
                                 </video>`;
                 listItems[item].innerHTML += `<img class="delete"
-                onclick="deleteVideo(${item})" src="https://www.flaticon.com/svg/static/icons/svg/875/875550.svg"
+                onclick="deleteVideo(${item})" src="icons/delete.png"
                 alt="delete"> 
                 </img>`;
                 listItems[item].innerHTML += `<img class="move"
-                onclick="moveVideo(${item})" src="https://www.flaticon.com/svg/static/icons/svg/617/617836.svg"
+                onclick="moveVideo(${item})" src="icons/move.png"
                 alt="move"> 
                 </img>`;
         
@@ -325,7 +325,7 @@ function moveVideo(id) {
        if (i !== id) {
             listItems[i].style = 'background-color: rgb(32,153,80, 0.3)';
             let move = listItems[i].querySelector('.move');
-            move.setAttribute('src', 'https://www.flaticon.com/svg/static/icons/svg/466/466154.svg');
+            move.setAttribute('src', 'icons/here.png');
 
             move.addEventListener('click', () => {
                 let aux = list[i]; 
@@ -350,12 +350,10 @@ async function playItem(i) {
     video.src = list[i].url;
 
     auxVideo.src = video.src;
-    auxVideo.muted = 'true';
     await auxVideo.load();
     await video.load();
     await video.play();
 
-    video.muted = false;
     if (list[i].subtitles) {
         readFromJson(list[i].subtitles);
     }
@@ -390,6 +388,7 @@ function next(delta) {
 function drawVideo() {
     context.drawImage(video, 0, 0, W, H);
     let imageData = context.getImageData(0, 0, W, H);
+    imageData.crossOrigin = "Anonymous";
     let v = imageData.data;
 
     if (bw) {
